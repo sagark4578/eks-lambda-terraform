@@ -1,0 +1,22 @@
+locals {
+  lambda = {
+    serverless-app = {
+      s3_bucket   = data.terraform_remote_state.codebuild-iam-roles.outputs.lambda_code_s3_bucket
+      handler     = "src/app/createClient.createClientapp"
+      runtime     = "nodejs20.x"
+      layer       = "/"
+      timeout     = 900
+      memory_size = 256
+      environment_variables = {
+        DATABASE_URL         = "postgresql://${data.terraform_remote_state.rds.outputs.postgres_rds_user_name}:${data.terraform_remote_state.rds.outputs.postgres_rds_password}@${data.terraform_remote_state.rds.outputs.postgres_rds_cluster_endpoint}/app?schema=public"
+        ENV_MODE             = "PRODUCTION"
+        awsSdkConnectTimeout = 5000
+        awsSdkMaxRetries     = 2
+        awsSdkTimeout        = 30000
+        httpClientTimeout    = 30000
+        mySqlConnectTimeout  = 10000
+        PRISMA_DB            = "/mnt/database/prisma/"
+      }
+    }
+   }
+ }
